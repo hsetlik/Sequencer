@@ -1,6 +1,33 @@
 #include <Arduino.h>
 #include <Wire.h>
- 
+//=========PINS===========================
+//based on ESP32 Devkit v1 pinout
+//NeoPixel data lines
+#define LED_SEQ 2
+#define LED_TRACK 4
+#define LED_PAGE 25
+//SPI & I2C pins
+#define SCL 22
+#define SCI 23
+#define SCK 9
+#define SDA 11
+#define DAC1 5
+#define DAC2 17
+//inputs
+#define PLAY 26
+#define CV_IN 15
+#define GATE_IN 19
+//gate outputs
+#define GATEA 27
+#define GATEB 14
+#define GATEC 13
+#define GATED 12
+//==========VARIABLES=====================
+
+//=========I2C HANDLING===================
+
+
+//============SETUP/LOOP==================
 void setup() {
   Wire.begin();
   Serial.begin(9600);
