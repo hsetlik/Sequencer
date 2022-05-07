@@ -8,6 +8,7 @@
 
 #include <Arduino.h>
 #include "Adafruit_NeoPixel.h"
+#include "Hsv.h"
 
 
 //One step in a sequence track
@@ -25,6 +26,8 @@ struct Track
 {
     Track() {}
     Step steps[SEQ_LENGTH];
+    //returns first the step at or before idx which has its gate toggled on
+    Step* lastOnStep(uint8_t idx);
 };
 
 //Gate statuses
@@ -49,6 +52,8 @@ public:
     void setSequenceLeds(Adafruit_NeoPixel* stepLeds, Adafruit_NeoPixel* pageLeds);
     //Set the gates
     void updateGates(TrackGates& gates);
+    //update the DAC voltages
+    void updateMvs(TrackMvs& mvs);
     //set the tempo and calcualte the period of each step
     void setTempo(int t);
 private:
