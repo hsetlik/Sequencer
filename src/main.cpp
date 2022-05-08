@@ -1,5 +1,8 @@
 #include <Arduino.h>
 #include <Wire.h>
+#include <MCP48xx.h>
+#include <Adafruit_NeoPixel.h>
+#include "Sequence.h"
 //=========PINS===========================
 //based on ESP32 Devkit v1 pinout
 //NeoPixel data lines
@@ -22,47 +25,90 @@
 #define GATEB 14
 #define GATEC 13
 #define GATED 12
+//I2C device addresses
+#define CONTROLLER 8
 //==========VARIABLES=====================
-
+//Output DACs for control voltage
+MCP4822 dac1(DAC1);
+MCP4822 dac2(DAC2);
+//LEDs
+Adafruit_NeoPixel pagePixels(4, LED_PAGE, NEO_GRB + NEO_KHZ800);
+//Sequence
+Sequence seq;
 //=========I2C HANDLING===================
+void moveEncoder(uint8_t idx, bool dir)
+{
+  //TODO
+}
+void buttonPressed(uint8_t idx)
+{
+  switch (idx)
+  {
+    case 0: //Encoder A switch
+    {
+      break;
+    }
+    case 1://Encoder B switch
+    {
+      break;
+    }
+   case 2: //Encoder C switch
+    {
+      break;
+    }
+    case 3: //Encoder D switch
+    {
+      break;
+    }
+    case 4: //Menu left button
+    {
+      break;
+    }
+    case 5: //Menu right button
+    {
+      break;
+    }
+    default:
+      break;
 
+  }
+}
+void recieveEvent(int num)
+{
+    bool isEncoder = Wire.read() == 1;
+    int idx = Wire.read();
+    bool dir = Wire.read() == 1;
+    if(isEncoder)
+    {
+        moveEncoder(idx, dir);
+    }
+    else
+    {
+        buttonPressed(idx);
+    }
+}
+//============HARDWARE UPDATING===========
+void updateDACs()
+{
 
+}
+void updatePixels()
+{
+
+}
+void updateGates()
+{
+
+}
 //============SETUP/LOOP==================
-void setup() {
-  Wire.begin();
+void setup() 
+{
+  Wire.begin(CONTROLLER);
+  Wire.onReceive(recieveEvent);
   Serial.begin(9600);
-  Serial.println("\nI2C Scanner");
 }
  
-void loop() {
-  byte error, address;
-  int nDevices;
-  Serial.println("Scanning...");
-  nDevices = 0;
-  for(address = 1; address < 127; address++ ) {
-    Wire.beginTransmission(address);
-    error = Wire.endTransmission();
-    if (error == 0) {
-      Serial.print("I2C device found at address 0x");
-      if (address<16) {
-        Serial.print("0");
-      }
-      Serial.println(address,HEX);
-      nDevices++;
-    }
-    else if (error==4) {
-      Serial.print("Unknow error at address 0x");
-      if (address<16) {
-        Serial.print("0");
-      }
-      Serial.println(address,HEX);
-    }    
-  }
-  if (nDevices == 0) {
-    Serial.println("No I2C devices found\n");
-  }
-  else {
-    Serial.println("done\n");
-  }
-  delay(5000);          
+void loop() 
+{
+
 }
