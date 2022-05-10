@@ -199,8 +199,8 @@ void setup()
   Serial.begin(115200);
   initWifi();
   //initI2C();
-  //initDACs();
-  //initLEDs();
+  initDACs();
+  initLEDs();
 }
  
 void loop() 

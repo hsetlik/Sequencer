@@ -18,5 +18,34 @@ private:
     std::unique_ptr<Sequence> sequence;
 
 };
+/*
+DUMMY JSON OBJECTS:
+
+STEP:
+{
+    "midiNumber": 69,
+    "gate": false,
+    "length": 80
+}
+=============================
+SEQUENCE:
+{
+    "name": "sequence name",
+    "tempo": 120,
+    "tracks": [
+        [
+        {
+    "midiNumber": 69,
+    "gate": false,
+    "length": 80
+    }
+
+        ]
+    ]
+
+}
+
+
+*/
 
 #endif

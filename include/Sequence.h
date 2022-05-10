@@ -18,6 +18,11 @@
 #include <Arduino.h>
 #include "Adafruit_NeoPixel.h"
 #include "Hsv.h"
+#include <ArduinoJson.h>
+#include <string>
+
+#define SEQ_BYTES 12288
+typedef StaticJsonDocument<SEQ_BYTES> SeqJson;
 
 //the microcontroller pins attached to each gate output
 const uint8_t gatePins[] = {2, 3, 4, 5};
@@ -30,6 +35,7 @@ struct Step
     bool gate;
     //gate length as a percentage of the length of one step 
     int length;
+    void addToJsonArray(JsonArray& arr);
 };
 
 //One of a seqnence's four tracks
@@ -40,6 +46,8 @@ struct Track
     bool gateHigh;
     //returns first the step at or before idx which has its gate toggled on
     int lastOnStep(uint8_t idx);
+    void addNestedStepsArray(JsonArray& arr);
+    
 };
 //All the data for playback/saving a sequence
 
@@ -71,12 +79,16 @@ public:
     void shiftGateLength(bool dir);
     void shiftQuantType(bool dir);
     void shiftQuantRoot(bool dir);
-
+    //Get JSON to save sequence file
+    SeqJson getJsonDocument(std::string name="sequence name");
 private:
     int tempo;
     unsigned long periodMicros;
+    
     unsigned long microsIntoPeriod;
     unsigned long lastMicros;
     void advance();
+
+
 };
 #endif

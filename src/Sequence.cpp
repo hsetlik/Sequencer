@@ -4,6 +4,14 @@
 Step::Step() : midiNumber(69), gate(false), length(80)
 {
 }
+
+void Step::addToJsonArray(JsonArray& arr)
+{
+    auto obj = arr.createNestedObject();
+    obj["midiNumber"] = midiNumber;
+    obj["gate"] = gate;
+    obj["length"] = length;
+}
 //=====================TRACK==============================
 int Track::lastOnStep(uint8_t idx)
 {
@@ -16,6 +24,14 @@ int Track::lastOnStep(uint8_t idx)
         ++stepsChecked;
     }
     return -1;
+}
+void Track::addNestedStepsArray(JsonArray& arr)
+{
+    auto jsonSteps = arr.createNestedArray();
+    for(uint8_t s = 0; s < SEQ_LENGTH; ++s)
+    {
+        steps[s].addToJsonArray(jsonSteps);
+    }
 }
 //=====================SEQUENCE==============================
 Sequence::Sequence() :
@@ -206,4 +222,16 @@ void Sequence::setTempo(int t)
 {
     tempo = t;
     periodMicros = (unsigned long)(60000000.0f / (float)tempo);
+}
+SeqJson Sequence::getJsonDocument(std::string name)
+{
+    SeqJson doc;
+    doc["name"] = name.c_str();
+    doc["tempo"] = tempo;
+    auto jsonTracks = doc.createNestedArray("tracks");
+    for(uint8_t t = 0; t < NUM_TRACKS; ++t)
+    {
+        tracks[t].addNestedStepsArray(jsonTracks);
+    }
+    return doc;
 }
