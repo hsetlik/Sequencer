@@ -8,6 +8,7 @@
 #include <ESPAsyncWebServer.h>
 #include <AsyncElegantOTA.h>
 #include <WiFi.h>
+#include <Adafruit_SSD1306.h>
 //=========PINS===========================
 //based on ESP32 Devkit v1 pinout
 //NeoPixel data lines
@@ -34,6 +35,11 @@
 #define CONTROLLER 8
 //Other definitions
 #define BRIGHTNESS 30
+//Display stuff
+#define SCREEN_WIDTH 128 
+#define SCREEN_HEIGHT 32
+#define OLED_RESET     4
+#define SCREEN_ADDRESS 0x3C
 //==========VARIABLES=====================
 //WiFi/OTA stuff
 const char* ssid = "SD Airport";
@@ -49,6 +55,9 @@ Adafruit_NeoPixel stepPixels(16, LED_SEQ, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel trackPixels(4, LED_TRACK, NEO_GRB + NEO_KHZ800);
 //Sequence
 Sequence seq;
+//Display
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 //=========I2C HANDLING===================
 void moveEncoder(uint8_t idx, bool dir)
 {
@@ -193,22 +202,97 @@ void initLEDs()
   stepPixels.setBrightness(BRIGHTNESS);
 }
 //============SETUP/LOOP==================
+bool displayFailed = false;
 void setup() 
 {
   pinMode(2, OUTPUT);
+  pinMode(13, OUTPUT);
   Serial.begin(115200);
+  Wire.begin(21, 22);
+  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    displayFailed = true;
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;); // Don't proceed, loop forever
+  }
+
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+
+
   initWifi();
   //initI2C();
   initDACs();
   initLEDs();
 }
+void testdrawline() {
+  int16_t i;
+
+  display.clearDisplay(); // Clear display buffer
+
+  for(i=0; i<display.width(); i+=4) {
+    display.drawLine(0, 0, i, display.height()-1, SSD1306_WHITE);
+    display.display(); // Update screen with each newly-drawn line
+    delay(1);
+  }
+  for(i=0; i<display.height(); i+=4) {
+    display.drawLine(0, 0, display.width()-1, i, SSD1306_WHITE);
+    display.display();
+    delay(1);
+  }
+  delay(250);
+
+  display.clearDisplay();
+
+  for(i=0; i<display.width(); i+=4) {
+    display.drawLine(0, display.height()-1, i, 0, SSD1306_WHITE);
+    display.display();
+    delay(1);
+  }
+  for(i=display.height()-1; i>=0; i-=4) {
+    display.drawLine(0, display.height()-1, display.width()-1, i, SSD1306_WHITE);
+    display.display();
+    delay(1);
+  }
+  delay(250);
+
+  display.clearDisplay();
+
+  for(i=display.width()-1; i>=0; i-=4) {
+    display.drawLine(display.width()-1, display.height()-1, i, 0, SSD1306_WHITE);
+    display.display();
+    delay(1);
+  }
+  for(i=display.height()-1; i>=0; i-=4) {
+    display.drawLine(display.width()-1, display.height()-1, 0, i, SSD1306_WHITE);
+    display.display();
+    delay(1);
+  }
+  delay(250);
+
+  display.clearDisplay();
+
+  for(i=0; i<display.height(); i+=4) {
+    display.drawLine(display.width()-1, 0, 0, i, SSD1306_WHITE);
+    display.display();
+    delay(1);
+  }
+  for(i=0; i<display.width(); i+=4) {
+    display.drawLine(display.width()-1, 0, i, display.height()-1, SSD1306_WHITE);
+    display.display();
+    delay(1);
+  }
+
+  delay(2000); // Pause for 2 seconds
+}
  
 void loop() 
 {
   digitalWrite(2, HIGH);
-  delay(200);
+  digitalWrite(13, LOW);
+  delay(displayFailed ? 80 : 300);
   digitalWrite(2, LOW);
-  delay(500);
-  
-
+  digitalWrite(13, HIGH);
+  delay(displayFailed ? 80 : 300);
+  testdrawline();
 }

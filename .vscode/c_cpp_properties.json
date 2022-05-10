@@ -10,6 +10,9 @@
             "includePath": [
                 "/Users/hayden/Desktop/Electronics/Code/Sequencer2/Sequencer/include",
                 "/Users/hayden/Desktop/Electronics/Code/Sequencer2/Sequencer/src",
+                "/Users/hayden/Desktop/Electronics/Code/Sequencer2/Sequencer/.pio/libdeps/esp32dev/Adafruit SSD1306",
+                "/Users/hayden/Desktop/Electronics/Code/Sequencer2/Sequencer/.pio/libdeps/esp32dev/Adafruit GFX Library",
+                "/Users/hayden/Desktop/Electronics/Code/Sequencer2/Sequencer/.pio/libdeps/esp32dev/Adafruit BusIO",
                 "/Users/hayden/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                 "/Users/hayden/.platformio/packages/framework-arduinoespressif32/libraries/Update/src",
                 "/Users/hayden/Desktop/Electronics/Code/Sequencer2/Sequencer/.pio/libdeps/esp32dev/ESPAsyncWebServer-esphome/src",
@@ -235,6 +238,9 @@
                 "path": [
                     "/Users/hayden/Desktop/Electronics/Code/Sequencer2/Sequencer/include",
                     "/Users/hayden/Desktop/Electronics/Code/Sequencer2/Sequencer/src",
+                    "/Users/hayden/Desktop/Electronics/Code/Sequencer2/Sequencer/.pio/libdeps/esp32dev/Adafruit SSD1306",
+                    "/Users/hayden/Desktop/Electronics/Code/Sequencer2/Sequencer/.pio/libdeps/esp32dev/Adafruit GFX Library",
+                    "/Users/hayden/Desktop/Electronics/Code/Sequencer2/Sequencer/.pio/libdeps/esp32dev/Adafruit BusIO",
                     "/Users/hayden/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                     "/Users/hayden/.platformio/packages/framework-arduinoespressif32/libraries/Update/src",
                     "/Users/hayden/Desktop/Electronics/Code/Sequencer2/Sequencer/.pio/libdeps/esp32dev/ESPAsyncWebServer-esphome/src",
