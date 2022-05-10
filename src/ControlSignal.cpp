@@ -54,9 +54,10 @@ byte ControlSignal::setBit(byte bit, uint8_t idx, bool value)
 
 void ControlSignal::printByte(byte bits)
 {
+    std::string str;
     for (auto i = 0; i < 8; ++i)
     {
-        Serial.print((bitValue(bits, i) ? "1" : "0"));
+        str += (bitValue(bits, i)) ? "1" : "0";
     }
-    Serial.println("\n");
+    OledLog::writeLn(str);
 }

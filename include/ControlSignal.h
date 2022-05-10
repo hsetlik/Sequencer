@@ -1,6 +1,7 @@
 #ifndef CONTROLSIGNAL_H
 #define CONTROLSIGNAL_H
 #include <Arduino.h>
+#include "OledLog.h"
 //definitions for control signal bits
 #define ISBUTTON_BIT 6
 #define DIR_BIT 7

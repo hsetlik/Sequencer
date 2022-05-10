@@ -10,6 +10,7 @@
 #include <WiFi.h>
 #include <Adafruit_SSD1306.h>
 #include "ControlSignal.h"
+#include "OledLog.h"
 //=========PINS===========================
 //based on ESP32 Devkit v1 pinout
 //NeoPixel data lines
@@ -59,6 +60,35 @@ Sequence seq;
 //Display
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+//========================================
+//we need to implement the function declared in OledLog.h now that we have a display object
+//how many lines the screen can fit
+#define LOG_HEIGHT 4
+
+std::string logStrings[LOG_HEIGHT];
+
+void insertLogString(std::string str)
+{
+  for(int i = 1; i < LOG_HEIGHT; ++i)
+  {
+    logStrings[i - 1] = logStrings[i];
+  }
+  logStrings[LOG_HEIGHT - 1] = str;
+}
+
+void OledLog::writeLn(std::string str)
+{
+  display.clearDisplay();
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 0);
+  display.setTextSize(1);
+  insertLogString(str);
+  for(auto s : logStrings)
+  {
+    display.println(s.c_str());
+  }
+  display.display();
+}
 //=========I2C HANDLING===================
 
 void moveEncoder(uint8_t idx, bool dir)
@@ -297,11 +327,42 @@ void testdrawline() {
 
   delay(2000); // Pause for 2 seconds
 }
- 
+
+void testscrolltext(void) {
+  display.clearDisplay();
+
+  display.setTextSize(2); // Draw 2X-scale text
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 0);
+  display.println(F("scroll"));
+  display.display();      // Show initial text
+  delay(100);
+
+  // Scroll in various directions, pausing in-between:
+  display.startscrollright(0x00, 0x0F);
+  delay(2000);
+  display.stopscroll();
+  delay(1000);
+  display.startscrollleft(0x00, 0x0F);
+  delay(2000);
+  display.stopscroll();
+  delay(1000);
+  display.startscrolldiagright(0x00, 0x07);
+  delay(2000);
+  display.startscrolldiagleft(0x00, 0x07);
+  delay(2000);
+  display.stopscroll();
+  delay(1000);
+}
+int num = 0; 
 void loop() 
 {
   updatePixels();
   updateGates();
   updateDACs();
-  testdrawline();
+  //testdrawline();
+  //testscrolltext();
+  OledLog::writeLn(std::to_string(num));
+  ++num;
+  delay(500);
 }
