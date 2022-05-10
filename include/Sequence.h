@@ -4,7 +4,16 @@
 #define SEQ_LENGTH 64
 #define PAGE_LENGTH 16
 
+#define MIDI_MAX 127
+
 #define NUM_TRACKS 4
+
+#define TEMPO_MIN 5
+#define TEMPO_MAX 350
+
+#define GATE_MIN 5
+#define GATE_MAX 99
+
 
 #include <Arduino.h>
 #include "Adafruit_NeoPixel.h"
@@ -30,14 +39,10 @@ struct Track
     Step steps[SEQ_LENGTH];
     bool gateHigh;
     //returns first the step at or before idx which has its gate toggled on
-    uint8_t lastOnStep(uint8_t idx);
+    int lastOnStep(uint8_t idx);
 };
-
-//Gate statuses
-
-//Millivolts for each DAC channel
-
 //All the data for playback/saving a sequence
+
 class Sequence
 {
 public:
@@ -58,6 +63,15 @@ public:
     //set the tempo and calcualte the period of each step
     void setTempo(int t);
     int getTempo() {return tempo;}
+    //shifting functions for rotary encoders
+    void shiftSelected(bool dir);
+    void shiftNote(bool dir);
+    void shiftTrack(bool dir);
+    void shiftTempo(bool dir);
+    void shiftGateLength(bool dir);
+    void shiftQuantType(bool dir);
+    void shiftQuantRoot(bool dir);
+
 private:
     int tempo;
     unsigned long periodMicros;
@@ -65,5 +79,4 @@ private:
     unsigned long lastMicros;
     void advance();
 };
-
 #endif

@@ -5,7 +5,7 @@ Step::Step() : midiNumber(69), gate(false), length(80)
 {
 }
 //=====================TRACK==============================
-uint8_t Track::lastOnStep(uint8_t idx)
+int Track::lastOnStep(uint8_t idx)
 {
     uint8_t stepsChecked = 0;
     while (stepsChecked < SEQ_LENGTH)
@@ -15,7 +15,7 @@ uint8_t Track::lastOnStep(uint8_t idx)
         idx = (idx > 0) ? idx - 1 : SEQ_LENGTH - 1;
         ++stepsChecked;
     }
-    return 0;
+    return -1;
 }
 //=====================SEQUENCE==============================
 Sequence::Sequence() :
@@ -119,24 +119,83 @@ void Sequence::updateGates()
     for (uint8_t i = 0; i < NUM_TRACKS; ++i)
     {
         //get the last step which was triggered
-        auto lastOn = tracks[i].lastOnStep(currentStep);
-        //turn the gate on
-        if (lastOn == currentStep && !tracks[i].gateHigh)
+        auto& trk = tracks[i];
+        auto lastOn = trk.lastOnStep(currentStep);
+        auto now = micros();
+        //Do nothing if the track is empty
+        if (lastOn == -1)
+            continue;
+        auto stepStart = now - microsIntoPeriod;
+        //if this is a gate from a previous step we need to offset by period * num. steps apart
+        if (lastOn != currentStep)
         {
-            tracks[i].gateHigh = true;
+            auto offset = (unsigned long)abs(currentStep - lastOn) * periodMicros;
+            stepStart -= offset;
+        }
+        //length of the gate in microseconds
+        auto length = (unsigned long)(periodMicros * (float)(trk.steps[lastOn].length / 100.0f));
+        auto gateOver = now >= stepStart + length;
+        //Turn on the gate as needed
+        if (lastOn == currentStep && !gateOver)
+        {
+            trk.gateHigh = true;
             digitalWrite(gatePins[i], HIGH);
         }
-        else if (tracks[i].gateHigh)
+        else if (trk.gateHigh && gateOver) //turn the gate off
         {
-           
-
-
-
-
+            trk.gateHigh = false;
+            digitalWrite(gatePins[i], LOW);
         }
-
-        
     }
+}
+
+//Rotary encoder handlers
+void Sequence::shiftSelected(bool dir)
+{
+    selectedStep = (dir) ? (selectedStep + 1) % SEQ_LENGTH : selectedStep - 1;
+    if (selectedStep < 0)
+        selectedStep += SEQ_LENGTH;
+}
+void Sequence::shiftNote(bool dir)
+{
+    auto& note = tracks[currentTrack].steps[selectedStep].midiNumber;
+    note = (dir) ? (note + 1) % MIDI_MAX : note - 1;
+    if (note < 0)
+        note = 0;
+}
+void Sequence::shiftTrack(bool dir)
+{
+    currentTrack = dir ? (currentTrack + 1) % NUM_TRACKS : currentTrack - 1;
+    if (currentTrack < 0)
+        currentTrack += NUM_TRACKS;
+}
+void Sequence::shiftTempo(bool dir)
+{
+    tempo = dir ? tempo + 1 : tempo - 1;
+    if (tempo > TEMPO_MAX)
+    {
+        tempo = TEMPO_MAX;
+    }
+    else if (tempo < TEMPO_MIN)
+        tempo = TEMPO_MIN;
+}
+void Sequence::shiftGateLength(bool dir)
+{
+    auto& length = tracks[currentTrack].steps[selectedStep].length;
+    length = dir ? length + 5 : length - 5;
+    if (length < GATE_MIN)
+        length = GATE_MIN;
+    else if (length > GATE_MAX)
+        length = GATE_MAX;
+
+}
+void Sequence::shiftQuantType(bool dir)
+{
+
+}
+void Sequence::shiftQuantRoot(bool dir)
+{
+
 }
 
 void Sequence::updateMvs()
