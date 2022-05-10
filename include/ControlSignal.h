@@ -14,6 +14,7 @@ enum ButtonId
     D,
     Left,
     Right,
+    Play,
     Trk1,
     Trk2,
     Trk3,

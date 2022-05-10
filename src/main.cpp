@@ -60,6 +60,10 @@ Sequence seq;
 //Display
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+//mode states
+bool pitchMode = true;
+bool quantizeMode = false;
 //========================================
 //we need to implement the function declared in OledLog.h now that we have a display object
 //how many lines the screen can fit
@@ -93,83 +97,119 @@ void OledLog::writeLn(std::string str)
 
 void moveEncoder(uint8_t idx, bool dir)
 {
-  //TODO
-}
-void buttonPressed(uint8_t idx)
-{
   switch (idx)
   {
-    case 0: //Encoder A switch
+    case 0: //First encoder moves selected note
     {
+      seq.shiftSelected(dir);
       break;
     }
-    case 1://Encoder B switch
+    case 1: //second encoder adjusts quantization root, pitch of selected step, gate length depending on mode
     {
+      if (quantizeMode)
+        seq.shiftQuantRoot(dir);
+      else if (pitchMode)
+        seq.shiftNote(dir);
+      else
+        seq.shiftGateLength(dir);
       break;
     }
-   case 2: //Encoder C switch
+    case 2: //Toggled between controlling tempo and controlling quantize mode
     {
+      if (quantizeMode)
+        seq.shiftQuantType(dir);
+      else
+        seq.shiftTempo(dir);
       break;
     }
-    case 3: //Encoder D switch
+    case 3:
     {
-      break;
-    }
-    case 4: //Menu left button
-    {
-      break;
-    }
-    case 5: //Menu right button
-    {
-      break;
-    }
-    case 6: //play/stop button
-    {
-      seq.isPlaying = !seq.isPlaying;
+      //TODO
+      //do something with the menu idk
       break;
     }
     default:
       break;
-
   }
 }
-void recieveEvent(int num)
+void buttonPressed(ButtonId button)
 {
-    bool isEncoder = Wire.read() == 1;
-    int idx = Wire.read();
-    bool dir = Wire.read() == 1;
-    if(isEncoder)
+  switch (button)
+  {
+    case A: //Toggles gate of selected note
     {
-        moveEncoder(idx, dir);
+      auto s = seq.getCurrentStep();
+      s.gate = !s.gate;
+      break;
     }
-    else
+    case B: //toggles between pitch and gate length control
     {
-        buttonPressed(idx);
+      pitchMode = !pitchMode;
+      break;
     }
+    case C: //toggles quantize mode
+    {
+      quantizeMode = !quantizeMode;
+      break;
+    }
+    case D:
+    {
+      OledLog::writeLn("TODO: program encoder D");
+      break;
+    }
+    case Left:
+    {
+      OledLog::writeLn("TODO: program left button");
+      break;
+    }
+    case Right:
+    {
+      OledLog::writeLn("TODO: program right button");
+      break;
+    }
+    case Play:
+    {
+      seq.isPlaying = !seq.isPlaying;
+      break;
+    }
+    case Trk1:
+    {
+      seq.currentTrack = 0;
+      break;
+    }
+    case Trk2:
+    {
+      seq.currentTrack = 1;
+      break;
+    }
+    case Trk3:
+    {
+      seq.currentTrack = 2;
+      break;
+    }
+    case Trk4:
+    {
+      seq.currentTrack = 3;
+      break;
+    }
+    
+    default:
+      break;
+
+  }
 }
 //alternate I2C callback
 void recieveControlSignal(int)
 {
   ControlSignal sig((byte)Wire.read());
   if (sig.isButton)
-    buttonPressed(sig.idx);
+    buttonPressed((ButtonId)sig.idx);
   else
     moveEncoder(sig.idx, sig.dir);
 }
 
 //============HARDWARE UPDATING===========
-void updateDACs()
-{
 
-}
-void updatePixels()
-{
-
-}
-void updateGates()
-{
-
-}
 //============SETUP SUBROUTINES===========
 //Set up wifi and enable OTA firmware updates
 void initWifi()
@@ -205,14 +245,6 @@ void initWifi()
   server.begin();
   Serial.println("HTTP server started");
 }
-
-//Establish I2C serial connection to input controller
-void initI2C()
-{
-  Wire.begin();
-  Wire.onReceive(recieveControlSignal);
-}
-
 //Set up MCP4822 DAC outputs
 void initDACs()
 {
@@ -243,14 +275,9 @@ void initLEDs()
   trackPixels.setBrightness(BRIGHTNESS);
   stepPixels.setBrightness(BRIGHTNESS);
 }
-//============SETUP/LOOP==================
-bool displayFailed = false;
-void setup() 
+//Set up OLED display
+void initDisplay()
 {
-  pinMode(2, OUTPUT);
-  pinMode(13, OUTPUT);
-  Serial.begin(115200);
-  Wire.begin(21, 22);
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     displayFailed = true;
     Serial.println(F("SSD1306 allocation failed"));
@@ -260,109 +287,26 @@ void setup()
   display.display();
   delay(2000);
   display.clearDisplay();
-
-
+}
+//============SETUP/LOOP==================
+bool displayFailed = false;
+void setup() 
+{
+  pinMode(2, OUTPUT);
+  pinMode(13, OUTPUT);
+  Serial.begin(115200);
+  Wire.begin(21, 22);
+  Wire.onReceive(recieveControlSignal);
+  initDisplay();
   initWifi();
-  //initI2C();
   initDACs();
   initLEDs();
-}
-void testdrawline() {
-  int16_t i;
-
-  display.clearDisplay(); // Clear display buffer
-
-  for(i=0; i<display.width(); i+=4) {
-    display.drawLine(0, 0, i, display.height()-1, SSD1306_WHITE);
-    display.display(); // Update screen with each newly-drawn line
-    delay(1);
-  }
-  for(i=0; i<display.height(); i+=4) {
-    display.drawLine(0, 0, display.width()-1, i, SSD1306_WHITE);
-    display.display();
-    delay(1);
-  }
-  delay(250);
-
-  display.clearDisplay();
-
-  for(i=0; i<display.width(); i+=4) {
-    display.drawLine(0, display.height()-1, i, 0, SSD1306_WHITE);
-    display.display();
-    delay(1);
-  }
-  for(i=display.height()-1; i>=0; i-=4) {
-    display.drawLine(0, display.height()-1, display.width()-1, i, SSD1306_WHITE);
-    display.display();
-    delay(1);
-  }
-  delay(250);
-
-  display.clearDisplay();
-
-  for(i=display.width()-1; i>=0; i-=4) {
-    display.drawLine(display.width()-1, display.height()-1, i, 0, SSD1306_WHITE);
-    display.display();
-    delay(1);
-  }
-  for(i=display.height()-1; i>=0; i-=4) {
-    display.drawLine(display.width()-1, display.height()-1, 0, i, SSD1306_WHITE);
-    display.display();
-    delay(1);
-  }
-  delay(250);
-
-  display.clearDisplay();
-
-  for(i=0; i<display.height(); i+=4) {
-    display.drawLine(display.width()-1, 0, 0, i, SSD1306_WHITE);
-    display.display();
-    delay(1);
-  }
-  for(i=0; i<display.width(); i+=4) {
-    display.drawLine(display.width()-1, 0, i, display.height()-1, SSD1306_WHITE);
-    display.display();
-    delay(1);
-  }
-
-  delay(2000); // Pause for 2 seconds
-}
-
-void testscrolltext(void) {
-  display.clearDisplay();
-
-  display.setTextSize(2); // Draw 2X-scale text
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 0);
-  display.println(F("scroll"));
-  display.display();      // Show initial text
-  delay(100);
-
-  // Scroll in various directions, pausing in-between:
-  display.startscrollright(0x00, 0x0F);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
-  display.startscrollleft(0x00, 0x0F);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
-  display.startscrolldiagright(0x00, 0x07);
-  delay(2000);
-  display.startscrolldiagleft(0x00, 0x07);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
 }
 int num = 0; 
 void loop() 
 {
-  updatePixels();
-  updateGates();
-  updateDACs();
-  //testdrawline();
-  //testscrolltext();
-  OledLog::writeLn(std::to_string(num));
-  ++num;
-  delay(500);
+  seq.checkAdvance();
+  seq.setSequenceLeds(&stepPixels, &pagePixels);
+  seq.updateGates();
+  seq.updateMvs();
 }

@@ -81,6 +81,7 @@ public:
     void shiftQuantRoot(bool dir);
     //Get JSON to save sequence file
     SeqJson getJsonDocument(std::string name="sequence name");
+    Step& getCurrentStep() { return tracks[currentTrack].steps[currentStep]; }
 private:
     int tempo;
     unsigned long periodMicros;
