@@ -84,7 +84,6 @@ public:
 private:
     int tempo;
     unsigned long periodMicros;
-    
     unsigned long microsIntoPeriod;
     unsigned long lastMicros;
     void advance();

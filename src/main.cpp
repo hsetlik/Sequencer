@@ -9,6 +9,7 @@
 #include <AsyncElegantOTA.h>
 #include <WiFi.h>
 #include <Adafruit_SSD1306.h>
+#include "ControlSignal.h"
 //=========PINS===========================
 //based on ESP32 Devkit v1 pinout
 //NeoPixel data lines
@@ -59,6 +60,7 @@ Sequence seq;
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 //=========I2C HANDLING===================
+
 void moveEncoder(uint8_t idx, bool dir)
 {
   //TODO
@@ -115,6 +117,16 @@ void recieveEvent(int num)
         buttonPressed(idx);
     }
 }
+//alternate I2C callback
+void recieveControlSignal(int)
+{
+  ControlSignal sig((byte)Wire.read());
+  if (sig.isButton)
+    buttonPressed(sig.idx);
+  else
+    moveEncoder(sig.idx, sig.dir);
+}
+
 //============HARDWARE UPDATING===========
 void updateDACs()
 {
@@ -167,8 +179,8 @@ void initWifi()
 //Establish I2C serial connection to input controller
 void initI2C()
 {
-  Wire.begin(CONTROLLER);
-  Wire.onReceive(recieveEvent);
+  Wire.begin();
+  Wire.onReceive(recieveControlSignal);
 }
 
 //Set up MCP4822 DAC outputs
@@ -288,11 +300,8 @@ void testdrawline() {
  
 void loop() 
 {
-  digitalWrite(2, HIGH);
-  digitalWrite(13, LOW);
-  delay(displayFailed ? 80 : 300);
-  digitalWrite(2, LOW);
-  digitalWrite(13, HIGH);
-  delay(displayFailed ? 80 : 300);
+  updatePixels();
+  updateGates();
+  updateDACs();
   testdrawline();
 }
