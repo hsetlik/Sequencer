@@ -2,7 +2,7 @@
 
 
 
-SequencePlayer::SequencePlayer() : seq(new Sequence())
+SequencePlayer::SequencePlayer() : sequence(new Sequence())
 {
 
 }

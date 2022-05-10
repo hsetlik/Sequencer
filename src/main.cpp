@@ -36,8 +36,8 @@
 #define BRIGHTNESS 30
 //==========VARIABLES=====================
 //WiFi/OTA stuff
-const char* ssid = "SD Airport 5GHz";
-const char* password = "Plinkun1737";
+const char* ssid = "SD Airport";
+const char* password = "plinsky1737";
 
 AsyncWebServer server(80);
 //Output DACs for control voltage
@@ -198,9 +198,9 @@ void setup()
   pinMode(2, OUTPUT);
   Serial.begin(115200);
   initWifi();
-  initI2C();
-  initDACs();
-  initLEDs();
+  //initI2C();
+  //initDACs();
+  //initLEDs();
 }
  
 void loop() 
@@ -208,7 +208,7 @@ void loop()
   digitalWrite(2, HIGH);
   delay(200);
   digitalWrite(2, LOW);
-  delay(200);
+  delay(500);
   
 
 }
