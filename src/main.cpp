@@ -11,28 +11,28 @@
 #include <Adafruit_SSD1306.h>
 #include "ControlSignal.h"
 #include "OledLog.h"
+#include "PresetMenu.h"
 //=========PINS===========================
 //based on ESP32 Devkit v1 pinout
 //NeoPixel data lines
-#define LED_SEQ 2
-#define LED_TRACK 4
-#define LED_PAGE 25
+#define LED_SEQ 13
+#define LED_TRACK 12
+#define LED_PAGE 14
 //SPI & I2C pins
-#define SCL 22
+#define SCL 26
 #define SCI 23
-#define SCK 9
-#define SDA 11
+#define SCK 18
+#define SDA 25
 #define DAC1 5
 #define DAC2 17
 //inputs
-#define PLAY 26
-#define CV_IN 15
-#define GATE_IN 19
+#define CV_IN 33
+#define GATE_IN 27
 //gate outputs
-#define GATEA 27
-#define GATEB 14
-#define GATEC 13
-#define GATED 12
+#define GATEA 22
+#define GATEB 1
+#define GATEC 3
+#define GATED 21
 //I2C device addresses
 #define CONTROLLER 8
 //Other definitions
@@ -44,8 +44,8 @@
 #define SCREEN_ADDRESS 0x3C
 //==========VARIABLES=====================
 //WiFi/OTA stuff
-const char* ssid = "SD Airport";
-const char* password = "plinsky1737";
+const std::string ssid = "SD Airport";
+const std::string password = "plinsky1737";
 
 AsyncWebServer server(80);
 //Output DACs for control voltage
@@ -60,6 +60,8 @@ Sequence seq;
 //Display
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+PresetMenu menu(&seq, &display);
 
 //mode states
 bool pitchMode = true;
@@ -215,14 +217,13 @@ void recieveControlSignal(int)
 void initWifi()
 {
   WiFi.mode(WIFI_STA);
-  auto res = WiFi.begin(ssid, password);
+  auto res = WiFi.begin(ssid.c_str(), password.c_str());
   if (res == WL_CONNECT_FAILED)
   {
-    Serial.println("Connection failed");
+    OledLog::writeLn("Connection failed");
   } else if (res == WL_NO_SSID_AVAIL)
   {
-    Serial.print("No SSID Available with name ");
-    Serial.println(ssid);
+    OledLog::writeLn("Network " + ssid + " not available");
   }
   Serial.println(res);
   // Wait for connection
@@ -231,11 +232,9 @@ void initWifi()
     delay(500);
     Serial.print(".");
   }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+  auto ip = WiFi.localIP();
+  std::string logString = "Connected to " +  ssid + " with IP address " + std::to_string(ip);
+  OledLog::writeLn(logString);
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) 
   {
@@ -243,7 +242,7 @@ void initWifi()
   });
   AsyncElegantOTA.begin(&server);    // Start ElegantOTA
   server.begin();
-  Serial.println("HTTP server started");
+  OledLog::writeLn("HTTP server started");
 }
 //Set up MCP4822 DAC outputs
 void initDACs()
@@ -279,7 +278,6 @@ void initLEDs()
 void initDisplay()
 {
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    displayFailed = true;
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
@@ -295,7 +293,7 @@ void setup()
   pinMode(2, OUTPUT);
   pinMode(13, OUTPUT);
   Serial.begin(115200);
-  Wire.begin(21, 22);
+  Wire.begin(SDA, SCL);
   Wire.onReceive(recieveControlSignal);
   initDisplay();
   initWifi();

@@ -57,7 +57,7 @@ void ControlSignal::printByte(byte bits)
     std::string str = "00000000";
     for (auto i = 0; i < 8; ++i)
     {
-        str[i] = (bitValue(bits, 7 - i)) ? '1' : '0';
+        str[i] = (bitValue(bits, i)) ? '1' : '0';
     }
     OledLog::writeLn(str);
 }
