@@ -166,28 +166,28 @@ void Sequence::updateGates()
 }
 
 //Rotary encoder handlers
-void Sequence::shiftSelected(bool dir)
+void Sequence::shiftSelected(bool dirOrLength)
 {
-    selectedStep = (dir) ? (selectedStep + 1) % SEQ_LENGTH : selectedStep - 1;
+    selectedStep = (dirOrLength) ? (selectedStep + 1) % SEQ_LENGTH : selectedStep - 1;
     if (selectedStep < 0)
         selectedStep += SEQ_LENGTH;
 }
-void Sequence::shiftNote(bool dir)
+void Sequence::shiftNote(bool dirOrLength)
 {
     auto& note = tracks[currentTrack].steps[selectedStep].midiNumber;
-    note = (dir) ? (note + 1) % MIDI_MAX : note - 1;
+    note = (dirOrLength) ? (note + 1) % MIDI_MAX : note - 1;
     if (note < 0)
         note = 0;
 }
-void Sequence::shiftTrack(bool dir)
+void Sequence::shiftTrack(bool dirOrLength)
 {
-    currentTrack = dir ? (currentTrack + 1) % NUM_TRACKS : currentTrack - 1;
+    currentTrack = dirOrLength ? (currentTrack + 1) % NUM_TRACKS : currentTrack - 1;
     if (currentTrack < 0)
         currentTrack += NUM_TRACKS;
 }
-void Sequence::shiftTempo(bool dir)
+void Sequence::shiftTempo(bool dirOrLength)
 {
-    tempo = dir ? tempo + 1 : tempo - 1;
+    tempo = dirOrLength ? tempo + 1 : tempo - 1;
     if (tempo > TEMPO_MAX)
     {
         tempo = TEMPO_MAX;
@@ -195,21 +195,21 @@ void Sequence::shiftTempo(bool dir)
     else if (tempo < TEMPO_MIN)
         tempo = TEMPO_MIN;
 }
-void Sequence::shiftGateLength(bool dir)
+void Sequence::shiftGateLength(bool dirOrLength)
 {
     auto& length = tracks[currentTrack].steps[selectedStep].length;
-    length = dir ? length + 5 : length - 5;
+    length = dirOrLength ? length + 5 : length - 5;
     if (length < GATE_MIN)
         length = GATE_MIN;
     else if (length > GATE_MAX)
         length = GATE_MAX;
 
 }
-void Sequence::shiftQuantType(bool dir)
+void Sequence::shiftQuantType(bool dirOrLength)
 {
 
 }
-void Sequence::shiftQuantRoot(bool dir)
+void Sequence::shiftQuantRoot(bool dirOrLength)
 {
 
 }

@@ -1,6 +1,6 @@
 #include "ControlSignal.h"
 
-ControlSignal::ControlSignal() : isButton(true), dir(true), idx(0)
+ControlSignal::ControlSignal() : isButton(true), dirOrLength(true), idx(0)
 {
 
 }
@@ -9,7 +9,7 @@ ControlSignal::ControlSignal(byte d)
 {
     idx = byteIdx(d);
     isButton = bitValue(d, ISBUTTON_BIT);
-    dir = bitValue(d, DIR_BIT);
+    dirOrLength = bitValue(d, DIR_BIT);
 }
 uint8_t ControlSignal::byteIdx(byte bits)
 {
@@ -40,7 +40,7 @@ byte ControlSignal::asByte()
         //set isButton bit low
         out = setBit(out, ISBUTTON_BIT, false);
         //set direction bit
-        out = setBit(out, DIR_BIT, dir);
+        out = setBit(out, DIR_BIT, dirOrLength);
     }
     return out;
 }

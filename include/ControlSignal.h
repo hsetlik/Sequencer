@@ -26,7 +26,7 @@ public:
     ControlSignal();
     ControlSignal(byte d);
     bool isButton;
-    bool dir;
+    bool dirOrLength;
     uint8_t idx;
     byte asByte();
  private:

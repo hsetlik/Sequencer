@@ -72,13 +72,13 @@ public:
     void setTempo(int t);
     int getTempo() {return tempo;}
     //shifting functions for rotary encoders
-    void shiftSelected(bool dir);
-    void shiftNote(bool dir);
-    void shiftTrack(bool dir);
-    void shiftTempo(bool dir);
-    void shiftGateLength(bool dir);
-    void shiftQuantType(bool dir);
-    void shiftQuantRoot(bool dir);
+    void shiftSelected(bool dirOrLength);
+    void shiftNote(bool dirOrLength);
+    void shiftTrack(bool dirOrLength);
+    void shiftTempo(bool dirOrLength);
+    void shiftGateLength(bool dirOrLength);
+    void shiftQuantType(bool dirOrLength);
+    void shiftQuantRoot(bool dirOrLength);
     //Get JSON to save sequence file
     SeqJson getJsonDocument(std::string name="sequence name");
     Step& getCurrentStep() { return tracks[currentTrack].steps[currentStep]; }

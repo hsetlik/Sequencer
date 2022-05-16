@@ -49,9 +49,9 @@ uint8_t Quantize::TrackQuantizer::processNote(uint8_t note)
     return noteLut[note];
 }
 
-void Quantize::TrackQuantizer::shiftRoot(bool dir)
+void Quantize::TrackQuantizer::shiftRoot(bool dirOrLength)
 {
-    int newRoot = (dir) ? rootDegree + 1 : rootDegree - 1;
+    int newRoot = (dirOrLength) ? rootDegree + 1 : rootDegree - 1;
     if (newRoot < 0)
         newRoot += 12;
     rootDegree = (uint8_t)newRoot;
