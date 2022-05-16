@@ -9,8 +9,8 @@
 #include <AsyncElegantOTA.h>
 #include <WiFi.h>
 #include <Adafruit_SSD1306.h>
-#include "ControlSignal.h"
 #include "OledLog.h"
+#include "ControlSignal.h"
 #include "PresetMenu.h"
 //=========PINS===========================
 //based on ESP32 Devkit v1 pinout
@@ -23,8 +23,8 @@
 #define SCI 23
 #define SCK 18
 #define SDA 25
-#define DAC1 5
-#define DAC2 17
+#define DAC1 35
+#define DAC2 34
 //inputs
 #define CV_IN 33
 #define GATE_IN 27
@@ -134,7 +134,7 @@ void moveEncoder(uint8_t idx, bool dir)
       break;
   }
 }
-void buttonPressed(ButtonId button)
+void buttonPressed(ButtonId button, bool longPress=false)
 {
   switch (button)
   {
@@ -201,13 +201,13 @@ void buttonPressed(ButtonId button)
   }
 }
 //alternate I2C callback
-void recieveControlSignal(int)
+void receiveControlSignal(int)
 {
   ControlSignal sig((byte)Wire.read());
   if (sig.isButton)
     buttonPressed((ButtonId)sig.idx);
   else
-    moveEncoder(sig.idx, sig.dir);
+    moveEncoder(sig.idx, sig.dirOrLength);
 }
 
 //============HARDWARE UPDATING===========
@@ -294,7 +294,7 @@ void setup()
   pinMode(13, OUTPUT);
   Serial.begin(115200);
   Wire.begin(SDA, SCL);
-  Wire.onReceive(recieveControlSignal);
+  Wire.onReceive(receiveControlSignal);
   initDisplay();
   initWifi();
   initDACs();
